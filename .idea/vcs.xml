@@ -2,5 +2,10 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/metacentrum/modules/base" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/metacentrum/modules/crop" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/metacentrum/modules/utility" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/metacentrum/modules/video" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/metacentrum/modules/vision" vcs="Git" />
   </component>
 </project>

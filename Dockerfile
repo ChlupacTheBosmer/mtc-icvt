@@ -9,8 +9,8 @@ RUN conda install -c conda-forge mamba
 RUN apt-get update && apt-get install -y libarchive-dev
 
 # Set the working directory
-WORKDIR /ICVT
-
+RUN mkdir /home
+WORKDIR /home
 #RUN mamba update -n base -c defaults conda
 
 ## Install GIT
@@ -18,20 +18,18 @@ WORKDIR /ICVT
 # Install libarchive library
 
 # Clone the repository
-RUN git clone https://github.com/ChlupacTheBosmer/ICVT
+RUN git clone https://github.com/ChlupacTheBosmer/mtc-icvt
+RUN git submodule update --init --recursive
 
 # Install required packages and dependencies
+RUN pip install opencv-python>=4.7
 RUN pip install opencv-contrib-python>=4.8.0.74
 RUN mamba install --verbose -c conda-forge Pillow>=9.5.0
 RUN mamba install --verbose -c conda-forge pandas>=2.0.0
-RUN mamba install --verbose -c conda-forge xlwings>=0.30.5
-#RUN mamba install --verbose -c conda-forge hachoir-parser
-#RUN mamba install --verbose -c conda-forge hachoir-metadata
-RUN mamba install --verbose -c conda-forge imageio
-RUN mamba install --verbose -c conda-forge google-cloud-vision
-RUN mamba install --verbose -c conda-forge openpyxl
-RUN mamba install --verbose -c conda-forge typing_extensions>=4.5.0
-# numpy>=1.24.2
+RUN mamba install --verbose -c conda-forge numpy>=1.24.2
+RUN pip install hachoir
+RUN mamba install --verbose -c conda-forge imageio>=2.27.0
+RUN mamba install --verbose -c conda-forge google-cloud-vision>=3.4.4
 
 # Cleanup
 # RUN conda clean -afy
