@@ -1,0 +1,3 @@
+[submodule "metacentrum/modules/base"]
+	path = metacentrum/modules/base
+	url = https://github.com/ChlupacTheBosmer/icvt-base
