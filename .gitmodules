@@ -7,3 +7,6 @@
 [submodule "metacentrum/modules/utility"]
 	path = metacentrum/modules/utility
 	url = https://github.com/ChlupacTheBosmer/icvt-utility
+[submodule "metacentrum/modules/video"]
+	path = metacentrum/modules/video
+	url = https://github.com/ChlupacTheBosmer/icvt-video
