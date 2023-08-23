@@ -1,3 +1,6 @@
 [submodule "metacentrum/modules/base"]
 	path = metacentrum/modules/base
 	url = https://github.com/ChlupacTheBosmer/icvt-base
+[submodule "metacentrum/modules/crop"]
+	path = metacentrum/modules/crop
+	url = https://github.com/ChlupacTheBosmer/icvt-crop
