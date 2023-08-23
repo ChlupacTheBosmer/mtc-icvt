@@ -10,3 +10,6 @@
 [submodule "metacentrum/modules/video"]
 	path = metacentrum/modules/video
 	url = https://github.com/ChlupacTheBosmer/icvt-video
+[submodule "metacentrum/modules/vision"]
+	path = metacentrum/modules/vision
+	url = https://github.com/ChlupacTheBosmer/icvt-vision
