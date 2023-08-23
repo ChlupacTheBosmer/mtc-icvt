@@ -1,13 +1,17 @@
 # This file contains all shared functions and classes
 
-import os
+# Extra packages
 import cv2
+import numpy as np
+import imageio
+
+#Default part of python
+import os
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import filedialog
 import logging
-import numpy as np
-import imageio
+
 
 def ask_yes_no(text):
     global logger
@@ -238,7 +242,7 @@ def delete_image_and_related_txt(image_path, delete_txt: bool = True):
                         logger.info(f"Error deleting .txt file: {e}")
 
 def delete_corrupted_videos(folder_path):
-
+# TODO: Move this function to a separate script as part of the "video" submodule. Therefore utils will not be dependent on "imageio" and video relevant code will be in the correct module.
     for root, _, files in os.walk(folder_path):
         for file in files:
             if file.lower().endswith(('.mp4')):
