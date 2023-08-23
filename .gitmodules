@@ -4,3 +4,6 @@
 [submodule "metacentrum/modules/crop"]
 	path = metacentrum/modules/crop
 	url = https://github.com/ChlupacTheBosmer/icvt-crop
+[submodule "metacentrum/modules/utility"]
+	path = metacentrum/modules/utility
+	url = https://github.com/ChlupacTheBosmer/icvt-utility
