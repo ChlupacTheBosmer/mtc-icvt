@@ -13,3 +13,6 @@
 [submodule "metacentrum/modules/vision"]
 	path = metacentrum/modules/vision
 	url = https://github.com/ChlupacTheBosmer/icvt-vision
+[submodule "metacentrum/modules/database"]
+	path = metacentrum/modules/database
+	url = https://github.com/ChlupacTheBosmer/icvt-database
