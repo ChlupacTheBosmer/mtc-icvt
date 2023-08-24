@@ -3,6 +3,8 @@ from modules.base.icvt import AppAncestor
 from modules.utility import utils
 from modules.video import vid_data
 from modules.crop import crop
+from modules.database import sqlite_data
+from modules.video import construct_video
 
 # Part of python modules
 import configparser
@@ -38,13 +40,16 @@ class mtcCrop(AppAncestor):
         self.cap = None
         self.image_details_dict = {}
         self.main_window = None
+        self.frame_metadata_database = None
         self.visit_index = 0
 
         # Call the function to get a valid output folder
-        self.output_folder = self.get_valid_output_folder("output")
+        # self.output_folder = self.get_valid_folder("output")
+        self.output_folder = "output"
 
         # Call the function to get a valid output folder
-        self.video_folder_path = self.get_valid_output_folder("video")
+        # self.video_folder_path = self.get_valid_folder("video")
+        self.video_folder_path = "videos"
 
         # Construct ROI data
         self.reload_roi_entries()
@@ -57,9 +62,29 @@ class mtcCrop(AppAncestor):
 
         self.load_progress()
 
-        self.crop_engine()
+        success = self.crop_engine()
 
-    def get_valid_output_folder(self, folder_name):
+        if success and self.frame_metadata_database is not None:
+            script_path = os.path.join("modules", "database", "query_get_unique_values_of_roi.sql")
+            result = self.frame_metadata_database.execute_sql_script(script_path)
+            print(result)
+            for i, roi_number in enumerate(result):
+                print(roi_number[0])
+                query_params = (roi_number[0],)
+                script_path = os.path.join("modules", "database", "query_get_frame_paths_by_roi.sql")
+                frame_paths = self.frame_metadata_database.execute_sql_script(script_path, query_params)
+                construct_video.create_video_from_frames(frame_paths, f"test_{roi_number[0]}.mp4")
+
+                # Update the database
+                table_name = "Frames"
+                column_name = "low_fps_video_frame_number"
+                for i, frame_path in enumerate(frame_paths):
+                    new_value = i  # Depending on whether frames are also defined by index ostarting from zero
+                    condition_column = "frame_path"
+                    condition_value = frame_path[0]  # Change this value
+                    self.frame_metadata_database.update_column_value(table_name, column_name, new_value, condition_column, condition_value)
+
+    def get_valid_folder(self, folder_name):
         while True:
             folder_path = input(f'Enter the path to your {folder_name} folder. Make sure it is correct. Do not use quotes: ')
 
@@ -151,7 +176,8 @@ class mtcCrop(AppAncestor):
         self.points_of_interest_entry.clear()
         self.points_of_interest_entry = [[[], filepath] for filepath in self.video_filepaths]
 
-    # TODO: Modify
+    # TODO: Modify so that only video names are loaded. After all the script is supplied the folder with the videos,
+    #  therefore, it doesn't need to have a full path in the save file. It only creates issues.
     def load_progress(self):
 
         # Define logger
@@ -163,7 +189,8 @@ class mtcCrop(AppAncestor):
         if result == "y":
 
             # Call the function to get a valid output folder
-            save_file_folder = self.get_valid_output_folder("save")
+            #save_file_folder = self.get_valid_folder("save")
+            save_file_folder = "videos"
 
             if utils.check_path(save_file_folder, 0):
 
@@ -201,6 +228,14 @@ class mtcCrop(AppAncestor):
             else:
                 print("Invalid video folder path")
 
+    def create_frame_database(self):
+
+        database_path = os.path.join(self.video_folder_path, "frame_metadata.db")
+        frame_metadata_database = sqlite_data.frameDatabase(database_path)
+
+        return frame_metadata_database
+
+
     # TODO: Modify
     def crop_engine(self):
 
@@ -235,6 +270,9 @@ class mtcCrop(AppAncestor):
                 print(f"Unspecified path to a video folder.")
                 return
 
+            # Create database of frame metadata
+            self.frame_metadata_database = self.create_frame_database()
+
             # The whole frame settings is artificially altered to allow for whole frame generation - messy
             orig_wf = self.whole_frame
             self.whole_frame = 0
@@ -247,8 +285,12 @@ class mtcCrop(AppAncestor):
                 self.visit_duration = total_frames // self.fps
                 frame_number_start = 2
                 success, frame = self.video_file_object.read_video_frame(frame_number_start)
-                img_paths = crop.generate_frames(self, frame, success, os.path.basename(self.video_filepaths[i]), i, frame_number_start)
+                img_paths = crop.generate_frames(self, frame, success, os.path.basename(self.video_filepaths[i]), i, frame_number_start, self.frame_metadata_database)
+
+                # I also recieve this: self.image_details_dict[image_name] = [image_path, frame_number, roi_number, visit_number, 0]
+
             self.whole_frame = orig_wf
+            return True
 
 if __name__ == '__main__':
     mtc_crop = mtcCrop()
