@@ -16,3 +16,6 @@
 [submodule "metacentrum/modules/database"]
 	path = metacentrum/modules/database
 	url = https://github.com/ChlupacTheBosmer/icvt-database
+[submodule "metacentrum/modules/yolo"]
+	path = metacentrum/modules/yolo
+	url = https://github.com/ChlupacTheBosmer/icvt-yolo
