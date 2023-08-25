@@ -13,7 +13,7 @@ import json
 import os
 
 class mtcCrop(AppAncestor):
-    def __init__(self):
+    def __init__(self, video_folder_path, output_folder_path):
 
         # Define logger
         self.logger = self.log_define()
@@ -26,49 +26,58 @@ class mtcCrop(AppAncestor):
         self.config_read()
 
         # Define variables
+
+        # Obsolete but neccessary
+        self.default_label_category = 0
+        self.randomize = 0
         self.scanned_folders = []
         self.dir_hierarchy = False
         self.loaded = False
         self.crop_mode: int = 3
+        self.frames_per_visit = 0
         self.auto = 0
         self.frames = []
         self.modified_frames = []
-        self.video_filepaths = []
-        self.points_of_interest_entry = []
         self.button_images = []
         self.buttons = []
         self.gui_imgs = []
+        self.main_window = None
+
+        # In active use
+        self.video_filepaths = []
+        self.points_of_interest_entry = []
         self.cap = None
         self.image_details_dict = {}
-        self.main_window = None
         self.frame_metadata_database = None
         self.visit_index = 0
 
-        # Call the function to get a valid output folder
-        # self.output_folder = self.get_valid_folder("output")
-        self.output_folder = "output"
-
-        # Call the function to get a valid output folder
-        # self.video_folder_path = self.get_valid_folder("video")
-        self.video_folder_path = "videos"
+        # Assign folders
+        # TODO: Decide how the folder paths will be defined (via a file / string passed as arg)
+        self.output_folder = output_folder_path
+        self.video_folder_path = video_folder_path
 
         # Construct ROI data
+        # TODO: Move to crop.py both here and in iccs.py
         self.reload_roi_entries()
 
         # Create output folders
         utils.create_dir(self.output_folder)
-        utils.create_dir(os.path.join(self.output_folder, "whole frames"))
+        if self.whole_frame > 0:
+            utils.create_dir(os.path.join(self.output_folder, "whole frames"))
 
+        # Load video files
         self.load_videos()
 
+        # Load the save file
         self.load_progress()
 
+        # Run the crop engine
         success = self.crop_engine()
 
+        # If the crop_engine ran successfully and database was created, create a video from each roi and run OD on it.
         if success and self.frame_metadata_database is not None:
             script_path = os.path.join("modules", "database", "query_get_unique_values_of_roi.sql")
             result = self.frame_metadata_database.execute_sql_script(script_path)
-            print(result)
             for i, roi_number in enumerate(result):
                 print(roi_number[0])
                 query_params = (roi_number[0],)
@@ -103,13 +112,9 @@ class mtcCrop(AppAncestor):
         # Set default values
         config = configparser.ConfigParser()
         config['Crop settings'] = {
-            'crop_mode': '3',
             'crop_interval_frames': '30',
-            'frames_per_visit': '0',
             'yolo_processing': '0',
-            'default_label_category': '6',
             'yolo_conf': '0.25',
-            'randomize_interval': '0',
             'export_whole_frame': '0',
             'export_crops': '1',
             'crop_size': '640',
@@ -133,13 +138,9 @@ class mtcCrop(AppAncestor):
             self.config.read('settings_mtc_crop.ini', encoding='utf-8')
 
             # Get crop values from config
-            self.crop_mode = int(self.config['Crop settings'].get('crop_mode', '1').strip())
             self.frame_skip = int(self.config['Crop settings'].get('crop_interval_frames', '30').strip())
-            self.frames_per_visit = int(self.config['Crop settings'].get('frames_per_visit', '0').strip())
             self.yolo_processing = int(self.config['Crop settings'].get('yolo_processing', '0').strip())
-            self.default_label_category = int(self.config['Crop settings'].get('default_label_category', '6').strip())
             self.yolo_conf = float(self.config['Crop settings'].get('yolo_conf', '0.25').strip())
-            self.randomize = int(self.config['Crop settings'].get('randomize_interval', '0').strip())
             self.whole_frame = int(self.config['Crop settings'].get('export_whole_frame', '0').strip())
             self.cropped_frames = int(self.config['Crop settings'].get('export_crops', '1').strip())
             self.crop_size = int(self.config['Crop settings'].get('crop_size', '640').strip())
@@ -157,13 +158,9 @@ class mtcCrop(AppAncestor):
         config.read('settings_mtc_crop.ini')
 
         # Update values in the config file
-        config.set('Crop settings', 'crop_mode', str(self.crop_mode))
         config.set('Crop settings', 'crop_interval_frames', str(self.frame_skip))
-        config.set('Crop settings', 'frames_per_visit', str(self.frames_per_visit))
         config.set('Crop settings', 'yolo_processing', str(self.yolo_processing))
-        config.set('Crop settings', 'default_label_category', str(self.default_label_category))
         config.set('Crop settings', 'yolo_conf', str(self.yolo_conf))
-        config.set('Crop settings', 'randomize_interval', str(self.randomize))
         config.set('Crop settings', 'export_whole_frame', str(self.whole_frame))
         config.set('Crop settings', 'export_crops', str(self.cropped_frames))
         config.set('Crop settings', 'crop_size', str(self.crop_size))
@@ -194,8 +191,7 @@ class mtcCrop(AppAncestor):
         if result == "y":
 
             # Call the function to get a valid output folder
-            #save_file_folder = self.get_valid_folder("save")
-            save_file_folder = "videos"
+            save_file_folder = self.video_folder_path
 
             if utils.check_path(save_file_folder, 0):
 
@@ -223,11 +219,15 @@ class mtcCrop(AppAncestor):
                     set2 = set({os.path.basename(filepath) for filepath in self.video_filepaths})
                     print(set2)
                     if not set1 == set2:
-                        print("The contents of the video folder have changed since the save has been made. Cannot load the progress. Please start over.")
+                        print("The contents of the video folder have changed since the save has been made. "
+                              "Cannot load the progress. Please start over.")
                         self.reload_roi_entries()
                     else:
                         self.video_filepaths = []
-                        self.video_filepaths = video_filepaths_new.copy()
+                        prefix = save_file_folder
+
+                        # Create a new list with modified base names
+                        self.video_filepaths = [prefix + os.path.basename(path) for path in video_filepaths_new]
                 else:
                     print("There are no save files in the current directory.")
             else:
@@ -281,17 +281,18 @@ class mtcCrop(AppAncestor):
             orig_wf = self.whole_frame
             self.whole_frame = 0
 
-            # Starting from the second frame of every video frames are generated.
+            # Starting from the second frame of every video frames are generated. (could PARA)
             for i, filepath in enumerate(self.video_filepaths):
+
+
                 self.video_file_object = vid_data.Video_file(filepath, self.main_window, initiate_start_and_end_times=False)
                 self.fps = self.video_file_object.fps
                 total_frames = self.video_file_object.total_frames
                 self.visit_duration = total_frames // self.fps
-                frame_number_start = 2
+                frame_number_start = 1
                 success, frame = self.video_file_object.read_video_frame(frame_number_start)
                 img_paths = crop.generate_frames(self, frame, success, os.path.basename(self.video_filepaths[i]), i, frame_number_start, self.frame_metadata_database)
 
-                # I also recieve this: self.image_details_dict[image_name] = [image_path, frame_number, roi_number, visit_number, 0]
 
             self.whole_frame = orig_wf
             return True
