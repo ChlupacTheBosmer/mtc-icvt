@@ -4,8 +4,10 @@
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/metacentrum/modules/base" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/metacentrum/modules/crop" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/metacentrum/modules/database" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/metacentrum/modules/utility" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/metacentrum/modules/video" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/metacentrum/modules/vision" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/metacentrum/modules/yolo" vcs="Git" />
   </component>
 </project>
