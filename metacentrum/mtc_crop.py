@@ -5,6 +5,7 @@ from modules.video import vid_data
 from modules.crop import crop
 from modules.database import sqlite_data
 from modules.video import construct_video
+from modules.yolo import yolo_video_od as yolo_od
 
 # Part of python modules
 import configparser
@@ -73,7 +74,7 @@ class mtcCrop(AppAncestor):
                 query_params = (roi_number[0],)
                 script_path = os.path.join("modules", "database", "query_get_frame_paths_by_roi.sql")
                 frame_paths = self.frame_metadata_database.execute_sql_script(script_path, query_params)
-                construct_video.create_video_from_frames(frame_paths, f"test_{roi_number[0]}.mp4")
+                video_generated, video_file_path = construct_video.create_video_from_frames(frame_paths, f"video_od_{roi_number[0]}.mp4")
 
                 # Update the database
                 table_name = "Frames"
@@ -83,6 +84,10 @@ class mtcCrop(AppAncestor):
                     condition_column = "frame_path"
                     condition_value = frame_path[0]  # Change this value
                     self.frame_metadata_database.update_column_value(table_name, column_name, new_value, condition_column, condition_value)
+
+                if video_generated:
+                    detection_metadata = yolo_od.detect_visitors_on_video(video_file_path, roi_number[0])
+                    self.frame_metadata_database.update_detection_info(detection_metadata, roi_number[0])
 
     def get_valid_folder(self, folder_name):
         while True:
@@ -234,7 +239,6 @@ class mtcCrop(AppAncestor):
         frame_metadata_database = sqlite_data.frameDatabase(database_path)
 
         return frame_metadata_database
-
 
     # TODO: Modify
     def crop_engine(self):
