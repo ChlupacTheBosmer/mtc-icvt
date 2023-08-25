@@ -282,20 +282,26 @@ class mtcCrop(AppAncestor):
             self.whole_frame = 0
 
             # Starting from the second frame of every video frames are generated. (could PARA)
-            for i, filepath in enumerate(self.video_filepaths):
+            for i, video_filepath in enumerate(self.video_filepaths):
 
-
-                self.video_file_object = vid_data.Video_file(filepath, self.main_window, initiate_start_and_end_times=False)
-                self.fps = self.video_file_object.fps
+                self.video_file_object = vid_data.Video_file(video_filepath, self.main_window, initiate_start_and_end_times=False)
                 total_frames = self.video_file_object.total_frames
-                self.visit_duration = total_frames // self.fps
+                visit_duration = total_frames // self.video_file_object.fps
                 frame_number_start = 1
-                success, frame = self.video_file_object.read_video_frame(frame_number_start)
-                img_paths = crop.generate_frames(self, frame, success, os.path.basename(self.video_filepaths[i]), i, frame_number_start, self.frame_metadata_database)
+                # success, frame = self.video_file_object.read_video_frame(frame_number_start)
+                # img_paths = crop.generate_frames(self, frame, success, os.path.basename(self.video_filepaths[i]), i, frame_number_start, self.frame_metadata_database)
 
+                try:
+                    roi_index = next(
+                        ix for ix, sublist in enumerate(self.points_of_interest_entry) if sublist[1] == video_filepath)
+                except StopIteration:
+                    roi_index = 0
+                    self.logger.warning("No ROI entry found for a video file. Defaults to index 0")
 
-            self.whole_frame = orig_wf
-            return True
+                frame_generator = crop.generate_frames(self, self.video_file_object,
+                                                       self.points_of_interest_entry[roi_index][0], frame_number_start,
+                                                       visit_duration, name_prefix=self.prefix)
+            yield next(frame_generator)
 
 if __name__ == '__main__':
     mtc_crop = mtcCrop()
