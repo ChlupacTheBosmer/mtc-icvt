@@ -1,21 +1,26 @@
 # Import ICVT components
 from modules.base.icvt import AppAncestor
 from modules.utility import utils
-from modules.video import vid_data
+from modules.video import video_passive
 from modules.crop import crop
 from modules.database import sqlite_data
 from modules.video import construct_video
-from modules.yolo import yolo_video_od as yolo_od
 from modules.utility import validator
+from modules.yolo.yolo_video_od_simple import detect_visitors_on_video
 
 # Part of python modules
 import configparser
 import json
 import os
 import cv2
+import datetime
+import cProfile
 
 class mtcCrop(AppAncestor):
     def __init__(self, video_folder_path, output_folder_path):
+
+        # Print the current time in default format (including date and microseconds)
+        print("Start Time:", datetime.datetime.now())
 
         # Define logger
         self.logger = self.log_define()
@@ -73,29 +78,30 @@ class mtcCrop(AppAncestor):
         # Load the save file
         self.load_progress()
 
-        # If the crop_engine ran successfully and database was created, create a video from each roi and run OD on it.
-        print("done")
-        frame_size = None
-        out = None
-        frame_number = 0  # Initialize frame number
+        # Simply run YOLO on every video
+        # self.frame_metadata_database = self.create_frame_database()
+        # frame_number = 0
+        # for i, video_filepath in enumerate(self.video_filepaths):
+        #     detection_metadata = detect_visitors_on_video(video_filepath, os.path.join('resources', 'yolo', 'best.pt'))
+        #     for dict in detection_metadata:
+        #         frame_number += 1
 
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
-        # Run the crop engine
-        frame_generated = self.crop_engine()
+        # # Run the crop engine
+        self.crop_engine()
 
-        # if out is not None:
-        #     out.release()
+        # Print the current time in default format (including date and microseconds)
+        print("End Time:", datetime.datetime.now())
 
-                # script_path = os.path.join("modules", "database", "query_get_unique_values_of_roi.sql")
-                # result = self.frame_metadata_database.execute_sql_script(script_path)
-                # for i, roi_number in enumerate(result):
-                #     print(roi_number[0])
-                #     query_params = (roi_number[0],)
-                #     script_path = os.path.join("modules", "database", "query_get_frame_paths_by_roi.sql")
-                #     frame_paths = self.frame_metadata_database.execute_sql_script(script_path, query_params)
-                #     video_generated, video_file_path = construct_video.create_video_from_frames(frame_paths, f"video_od_{roi_number[0]}.mp4")
-                #
+
+        # script_path = os.path.join("modules", "database", "query_get_unique_values_of_roi.sql")
+        # result = self.frame_metadata_database.execute_sql_script(script_path)
+        # for i, roi_number in enumerate(result):
+        #     print(roi_number[0])
+        #     query_params = (roi_number[0],)
+        #     script_path = os.path.join("modules", "database", "query_get_frame_paths_by_roi.sql")
+        #     frame_paths = self.frame_metadata_database.execute_sql_script(script_path, query_params)
+        #     video_generated, video_file_path = construct_video.create_video_from_frames(frame_paths, f"video_od_{roi_number[0]}.mp4")
 
 
     def get_valid_folder(self, folder_name):
@@ -285,13 +291,12 @@ class mtcCrop(AppAncestor):
             # Starting from the second frame of every video frames are generated. (could PARA)
             for i, video_filepath in enumerate(self.video_filepaths):
 
-                self.video_file_object = vid_data.Video_file(video_filepath, self.main_window, initiate_start_and_end_times=False)
+                self.video_file_object = video_passive.VideoFilePassive(video_filepath)
                 total_frames = self.video_file_object.total_frames
                 visit_duration = total_frames // self.video_file_object.fps
                 frame_number_start = 1
-                # success, frame = self.video_file_object.read_video_frame(frame_number_start)
-                # img_paths = crop.generate_frames(self, frame, success, os.path.basename(self.video_filepaths[i]), i, frame_number_start, self.frame_metadata_database)
 
+                # TODO: Make this work so that the roi gets paired reliably to the video
                 # try:
                 #     roi_index = next(
                 #         ix for ix, sublist in enumerate(self.points_of_interest_entry) if sublist[1] == video_filepath)
@@ -299,61 +304,62 @@ class mtcCrop(AppAncestor):
                 #     roi_index = 0
                 #     self.logger.warning("No ROI entry found for a video file. Defaults to index 0")
 
-                # If the crop_engine ran successfully and database was created, create a video from each roi and run OD on it.
-                print("done")
+                # Define a video writer and variables
                 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-                frame_number = 0  # Initialize frame number
-                out = None
                 frame_size = None
-
                 video_writers = {}
+                entry_skeleton = [self.video_file_object.recording_identifier, self.video_file_object.timestamp]
 
+                # Generator will contain a cropped frame from the video and should be processed further
                 frame_generator = crop.generate_frames(self, self.video_file_object,
                                                        self.points_of_interest_entry[i][0], frame_number_start,
                                                        visit_duration, frames_to_skip=self.frame_skip, name_prefix=self.prefix)
 
-                if validator.generator_has_elements(frame_generator):
+                for frame in frame_generator:
+                    img = frame.frame
 
-                    # for frame in frame_generator:
-                    #     img = frame.frame
-                    #
-                    #     if frame.roi_number not in video_writers:
-                    #         if frame_size is None:
-                    #             frame_size = (img.shape[1], img.shape[0])
-                    #         video_filepath = os.path.join(self.output_folder, f"crop_video_roi_{frame.roi_number}.mp4")
-                    #         video_writers[frame.roi_number] = {
-                    #             'writer': cv2.VideoWriter(video_filepath, fourcc, 15, frame_size),
-                    #             'frame_count': 0  # Initialize the frame count for each ROI
-                    #         }
-                    #
-                    #     video_writers[frame.roi_number]['writer'].write(img)
-                    #     video_writers[frame.roi_number]['frame_count'] += 1  # Increment frame count
-                    #
-                    #     # Update the database
-                    #     table_name = "Frames"
-                    #     column_name = "low_fps_video_frame_number"
-                    #     new_value = video_writers[frame.roi_number][
-                    #         'frame_count']  # Depending on whether frames are also defined by index starting from zero
-                    #     condition_column = "frame_path"
-                    #     condition_value = frame.name  # Change this value
-                    #     self.frame_metadata_database.update_column_value(table_name, column_name, new_value,
-                    #                                                      condition_column, condition_value)
-                    #
-                    # # Release video writers and print frame counts
-                    # for roi_number, writer_info in video_writers.items():
-                    #     writer_info['writer'].release()
-                    #     print(f"ROI {roi_number} wrote {writer_info['frame_count']} frames.")
-                    #
-                    # for key, value in video_writers.items():
-                    #     video_file_path = os.path.join(self.output_folder, f"crop_video_roi_{key}.mp4")
-                    #     detection_metadata = yolo_od.detect_visitors_on_video(video_file_path, key)
-                    #     self.frame_metadata_database.update_detection_info(detection_metadata, key)
+                    # Whenever a frame with new roi_number comes, new video file for that roi is created and frame
+                    # counter for that roi number and video writer is initiated.
+                    if frame.roi_number not in video_writers:
+                        if frame_size is None:
+                            frame_size = (img.shape[1], img.shape[0])
+                        video_filepath = os.path.join(self.output_folder, f"crop_video_roi_{frame.roi_number}.mp4")
+                        video_writers[frame.roi_number] = {
+                            'writer': cv2.VideoWriter(video_filepath, fourcc, 25, frame_size),
+                            'frame_count': 0,  # Initialize the frame count for each ROI
+                            'frame_entries': []
+                        }
 
-                    for frame in frame_generator:
-                        detection_metadata = yolo_od.detect_visitors_on_video(frame.frame, frame.roi_number)
+                    video_writers[frame.roi_number]['writer'].write(img)
+                    video_writers[frame.roi_number]['frame_count'] += 1  # Increment frame count
 
-                        for dict in detection_metadata:
-                            self.frame_metadata_database.update_detection_info(frame.id, next(iter(dict.values())))
+                    entry = entry_skeleton + [frame.roi_number, frame.frame_number, frame.visit_number,
+                                              frame.crop_upper_left_corner[0], frame.crop_upper_left_corner[1],
+                                              frame.crop_bottom_right_corner[0], frame.crop_bottom_right_corner[1],
+                                              frame.name, video_writers[frame.roi_number]['frame_count'],
+                                              0, 0, [], [], []]
+                    video_writers[frame.roi_number]['frame_entries'].append(entry)
+
+                # Release video writers and print frame counts
+                for roi_number, writer_info in video_writers.items():
+                    writer_info['writer'].release()
+                    print(f"ROI {roi_number} wrote {writer_info['frame_count']} frames.")
+
+                # Update the database
+                for key, value in video_writers.items():
+                    self.frame_metadata_database.add_multiple_entries(video_writers[key]['frame_entries'])
+
+                # Run object detection on each roi specific video and update database entries
+                for key, value in video_writers.items():
+                    update_entries = []
+                    video_file_path = os.path.join(self.output_folder, f"crop_video_roi_{key}.mp4")
+                    detection_metadata = detect_visitors_on_video(video_file_path)
+
+                    for data in detection_metadata:
+                        update_entries.append(data + [key])
+
+                    self.frame_metadata_database.update_detection_to_last_column(update_entries)
+
 
 if __name__ == '__main__':
-    mtc_crop = mtcCrop("videos", "output")
+    cProfile.run("mtc_crop = mtcCrop('videos', 'output')")
