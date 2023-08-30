@@ -6,3 +6,5 @@ numpy>=1.24.2
 imageio>=2.27.0
 hachoir>=3.2.0
 google-cloud-vision>=3.4.4
+ultralytics>=8.0.89
+
