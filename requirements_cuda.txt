@@ -1,0 +1,2 @@
+# Install all packages together using conda
+# conda install -c conda-forge -c pytorch -c nvidia ultralytics pytorch torchvision pytorch-cuda=11.7
