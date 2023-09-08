@@ -19,7 +19,7 @@ def process_video(video_filepath):
     database_entries = []
     detection_metadata = detect_visitors_on_video(video_file.filepath, os.path.join('resources', 'yolo', 'best.pt'),(height, width), frames_to_skip=15)
     for data in detection_metadata:
-        entry_skeleton[3] = data[0]
+        entry_skeleton[3] = data[0]  # Detection will replace the original value in the skeleton
         entry = entry_skeleton + data[1:]
         database_entries.append(entry)
     frame_metadata_database.add_multiple_entries(database_entries)
@@ -28,7 +28,7 @@ def process_video(video_filepath):
 if __name__ == "__main__":
     print("Start Time:", datetime.datetime.now())
     num_processes = multiprocessing.cpu_count()  # Use the number of available CPU cores
-    chunk_size = 1
+    chunk_size = 2
     video_filepaths = [r"D:\Dílna\Kutění\Python\ICCS\icvt\videos\GR2_L2_LavSto2_20220524_09_29.mp4", r"D:\Dílna\Kutění\Python\ICCS\icvt\videos\GR2_L2_LavSto2_20220524_09_59.mp4", r"D:\Dílna\Kutění\Python\ICCS\icvt\videos\GR2_L2_LavSto2_20220524_10_29.mp4", r"D:\Dílna\Kutění\Python\ICCS\icvt\videos\GR2_L2_LavSto2_20220524_10_44.mp4", r"D:\Dílna\Kutění\Python\ICCS\icvt\videos\GR2_L2_LavSto2_20220524_17_14.mp4", r"D:\Dílna\Kutění\Python\ICCS\icvt\videos\GR2_L2_LavSto2_20220525_09_17.mp4"]  # List of your video filepaths
 
     chunks = iter(video_filepaths)
