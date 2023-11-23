@@ -19,3 +19,6 @@
 [submodule "metacentrum/modules/yolo"]
 	path = metacentrum/modules/yolo
 	url = https://github.com/ChlupacTheBosmer/icvt-yolo
+[submodule "metacentrum/modules/mtc-train"]
+	path = metacentrum/modules/mtc-train
+	url = https://github.com/ChlupacTheBosmer/mtc-train
