@@ -36,15 +36,11 @@ singularity exec -B $HOMEDIR:/mnt \
 $SING_IMAGE python $HOMEDIR/pycharm/mtc-icvt/metacentrum/modules/mtc-train/train.py --dataset '0709b8c1' --datasets_dir\
  '$HOMEDIR/datasets' --workdir '$HOMEDIR/' --project_name 'Test of MTC'
 
+singularity exec -B $HOMEDIR:/mnt $SING_IMAGE $HOMEDIR/pycharm/mtc-icvt/metacentrum/run_in_image.sh
+
 singularity exec -B $HOMEDIR:/mnt \
-$SING_IMAGE "pip uninstall opencv &&
-rm -rf  /usr/local/lib/python3.10/dist-packages/cv2 &&
-apt update &&
-apt install  libx11-6 &&
-ls /mnt &&
-pip install clearml clearml-agent &&
-python $HOMEDIR/pycharm/mtc-icvt/metacentrum/modules/mtc-train/train.py --dataset '0709b8c1' --datasets_dir\
- '$HOMEDIR/datasets' --workdir '$HOMEDIR/' --project_name 'Test of MTC'"
+$SING_IMAGE "pip uninstall opencv && rm -rf  /usr/local/lib/python3.10/dist-packages/cv2 && apt update && apt install  libx11-6 && ls /mnt && pip install clearml clearml-agent && python $HOMEDIR/pycharm/mtc-icvt/metacentrum/modules/mtc-train/train.py --dataset '0709b8c1' --datasets_dir\
+  $HOMEDIR/datasets' --workdir '$HOMEDIR/' --project_name 'Test of MTC'"
 
 #
 #singularity exec -B $HOMEDIR:/mn
