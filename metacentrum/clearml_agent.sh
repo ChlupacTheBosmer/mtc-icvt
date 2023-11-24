@@ -30,6 +30,7 @@ cd $SCRATCHDIR
 
 #singularity exec -B $HOMEDIR:/mnt \
 #$SING_IMAGE python $HOMEDIR/pycharm/mtc-icvt/metacentrum/test_script.py
+export TMPDIR=$SCRATCHDIR
 
 singularity exec -B $HOMEDIR \
 $SING_IMAGE /bin/bash -c "echo 'test'; ls; pip install clearml clearml-agent; export PATH=$PATH:$HOMEDIR.local/bin; export TMPDIR=$SCRATCHDIR; clearml-agent --config-file '$HOMEDIR/clearml.conf' config; clearml-agent --config-file '$HOMEDIR/clearml.conf' daemon --queue default --foreground"
