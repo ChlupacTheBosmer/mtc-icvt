@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -N YOLOtrain
+#PBS -N ClearML-Agent
 #PBS -l select=1:ncpus=1:mem=64gb:scratch_local=1gb
 #PBS -l walltime=1:00:00
 #PBS -m ae
@@ -33,7 +33,7 @@ cd $SCRATCHDIR
 #$SING_IMAGE python $HOMEDIR/pycharm/mtc-icvt/metacentrum/test_script.py
 
 singularity exec -B $HOMEDIR \
-$SING_IMAGE /bin/bash -c "echo 'test'; ls /mnt; pip install clearml clearml-agent; export PATH=$PATH:$HOMEDIR.local/bin; clearml-agent config; clearml-agent daemon --queue default"
+$SING_IMAGE /bin/bash -c "echo 'test'; ls; pip install clearml clearml-agent; export PATH=$PATH:$HOMEDIR.local/bin; clearml-agent init --config-file '$HOMEDIR/clearml.conf'; clearml-agent config; clearml-agent daemon --queue default"
 
 
 #singularity exec -B $HOMEDIR:/mnt $SING_IMAGE $HOMEDIR/pycharm/mtc-icvt/metacentrum/run_in_image.sh
