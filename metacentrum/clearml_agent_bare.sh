@@ -38,15 +38,21 @@ else
     make install
 fi
 
-export PATH=$SCRATCHDIR/python/bin:$PATH
-export PATH=$SCRATCHDIR/.local/bin:$PATH
-export PATH=$HOMEDIR/jobs/python/bin:$PATH
-
+export PATH=$PATH:$SCRATCHDIR/python/bin
+export PATH=$PATH:$SCRATCHDIR/.local/bin
+export PATH=$PATH:$HOMEDIR/jobs/python/bin
+export PATH=$PATH:$HOMEDIR/.local/bin
+source $HOMEDIR/.bashrc
+cd $SCRATCHDIR
 echo 'test'
 ls
 pip install clearml clearml-agent
-export PATH=$PATH:$HOMEDIR.local/bin
-export PATH=$SCRATCHDIR/.local/bin:$PATH
+export PATH=$PATH:$SCRATCHDIR/python/bin
+export PATH=$PATH:$SCRATCHDIR/.local/bin
+export PATH=$PATH:$HOMEDIR/jobs/python/bin
+export PATH=$PATH:$HOMEDIR/.local/bin
+source $HOMEDIR/.bashrc
+cd $SCRATCHDIR
 export TMPDIR=$SCRATCHDIR
 clearml-agent --config-file '$HOMEDIR/clearml.conf' config
 clearml-agent --config-file '$HOMEDIR/clearml.conf' daemon --queue default --foreground
