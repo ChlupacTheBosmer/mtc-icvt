@@ -33,7 +33,7 @@ cd $SCRATCHDIR
 #$SING_IMAGE python $HOMEDIR/pycharm/mtc-icvt/metacentrum/test_script.py
 
 singularity exec -B $HOMEDIR:/mnt \
-$SING_IMAGE /bin/bash -c "pip install clearml clearml-agent; source ~/.bashrc; clearml-agent daemon --queue default"
+$SING_IMAGE /bin/bash -c "pip install clearml clearml-agent; export PATH=$PATH:$HOMEDIR.local/bin; clearml-agent daemon --queue default"
 
 
 #singularity exec -B $HOMEDIR:/mnt $SING_IMAGE $HOMEDIR/pycharm/mtc-icvt/metacentrum/run_in_image.sh
