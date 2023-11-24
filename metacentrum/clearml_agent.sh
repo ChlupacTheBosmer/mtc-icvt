@@ -33,7 +33,7 @@ cd $SCRATCHDIR
 #$SING_IMAGE python $HOMEDIR/pycharm/mtc-icvt/metacentrum/test_script.py
 
 singularity exec -B $HOMEDIR:/mnt \
-$SING_IMAGE "pip install clearml clearml-agent && python '$HOMEDIR/pycharm/mtc-icvt/metacentrum/modules/mtc-train/train.py' --dataset '0709b8c1' --datasets_dir\
+$SING_IMAGE /bin/bash -c "pip install clearml clearml-agent; python '$HOMEDIR/pycharm/mtc-icvt/metacentrum/modules/mtc-train/train.py' --dataset '0709b8c1' --datasets_dir\
  '$HOMEDIR/datasets' --workdir '$HOMEDIR/' --project_name 'Test of MTC'"
 
 #singularity exec -B $HOMEDIR:/mnt $SING_IMAGE $HOMEDIR/pycharm/mtc-icvt/metacentrum/run_in_image.sh
