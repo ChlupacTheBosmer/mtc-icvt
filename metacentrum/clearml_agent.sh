@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -N YOLOtrain
-#PBS -l select=1:ncpus=1:mem=4gb:scratch_local=1gb
+#PBS -l select=1:ncpus=1:mem=64gb:scratch_local=1gb
 #PBS -l walltime=1:00:00
 #PBS -m ae
 # The 4 lines above are options for scheduling system: job will run 1 hour at maximum, 1 machine with 4 processors +
