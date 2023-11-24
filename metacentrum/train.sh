@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -N YOLOtrain
-#PBS -l select=1:ncpus=1:mem=4gb:scratch_local=1gb
-#PBS -l walltime=1:00:00
+#PBS -l select=1:ncpus=1:ngpus=2:mem=64gb:scratch_local=1gb
+#PBS -l walltime=2:00:00
 #PBS -m ae
 # The 4 lines above are options for scheduling system: job will run 1 hour at maximum, 1 machine with 4 processors +
 # 4gb RAM memory + 10gb scratch memory are requested, email notification will be sent when the job aborts (a) or ends (e)
@@ -33,8 +33,8 @@ cd $SCRATCHDIR
 #$SING_IMAGE python $HOMEDIR/pycharm/mtc-icvt/metacentrum/test_script.py
 
 singularity exec -B $HOMEDIR:/mnt \
-$SING_IMAGE /bin/bash -c "pip install clearml clearml-agent; clearml-agent daemon --queue default"
-
+$SING_IMAGE /bin/bash -c "pip install clearml; python '$HOMEDIR/pycharm/mtc-icvt/metacentrum/modules/mtc-train/train.py' --dataset '0709b8c1' --datasets_dir\
+ '$HOMEDIR/datasets' --workdir '$HOMEDIR/' --project_name 'Test of MTC'"
 
 #singularity exec -B $HOMEDIR:/mnt $SING_IMAGE $HOMEDIR/pycharm/mtc-icvt/metacentrum/run_in_image.sh
 #
