@@ -40,8 +40,10 @@ fi
 
 export PATH=$PATH:$SCRATCHDIR/python/bin
 export PATH=$PATH:$SCRATCHDIR/.local/bin
+export PATH=$PATH:$SCRATCHDIR/.local/lib
 export PATH=$PATH:$HOMEDIR/jobs/python/bin
 export PATH=$PATH:$HOMEDIR/.local/bin
+export PATH=$PATH:$HOMEDIR/.local/lib
 source $HOMEDIR/.bashrc
 cd $SCRATCHDIR
 echo 'test'
