@@ -33,7 +33,7 @@ cd $SCRATCHDIR
 #$SING_IMAGE python $HOMEDIR/pycharm/mtc-icvt/metacentrum/test_script.py
 
 singularity exec -B $HOMEDIR:/mnt \
-$SING_IMAGE /bin/bash -c "ls; pip install clearml clearml-agent; source ~/.bashrc; export PATH=$PATH:$HOMEDIR.local/bin; clearml-agent config; clearml-agent daemon --queue default"
+$SING_IMAGE /bin/bash -c "echo 'test'; ls /mnt; pip install clearml clearml-agent; export PATH=$PATH:$HOMEDIR.local/bin; clearml-agent config; clearml-agent daemon --queue default"
 
 
 #singularity exec -B $HOMEDIR:/mnt $SING_IMAGE $HOMEDIR/pycharm/mtc-icvt/metacentrum/run_in_image.sh
@@ -49,6 +49,5 @@ $SING_IMAGE /bin/bash -c "ls; pip install clearml clearml-agent; source ~/.bashr
 
 # Copy everything from scratch directory to $HOME/jobs
 cp -r $SCRATCHDIR/* $HOMEDIR/jobs/
-cp test_output.txt $HOMEDIR/ || { echo >&2 "Result file(s) copying failed (with a code $?) !!"; exit 4; }
 
 clean_scratch
