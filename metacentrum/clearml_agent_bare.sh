@@ -56,8 +56,8 @@ export PATH=$PATH:$HOMEDIR/.local/bin
 source $HOMEDIR/.bashrc
 cd $SCRATCHDIR
 export TMPDIR=$SCRATCHDIR
-clearml-agent --config-file '$HOMEDIR/clearml.conf' config
-clearml-agent --config-file '$HOMEDIR/clearml.conf' daemon --queue default --foreground
+clearml-agent --config-file $HOMEDIR/clearml.conf config
+clearml-agent --config-file $HOMEDIR/clearml.conf daemon --queue default --foreground
 # Run calculations
 #singularity exec -B $HOMEDIR:/mnt \
 # $SING_IMAGE pip install clearml clearml-agent
