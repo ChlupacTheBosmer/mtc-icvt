@@ -24,15 +24,25 @@ test -n "$SCRATCHDIR" || { echo >&2 "Variable SCRATCHDIR is not set!"; exit 1; }
 # move into scratch directory
 cd $SCRATCHDIR
 export TMPDIR=$SCRATCHDIR
-wget https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tgz
-tar -xzf Python-3.10.0.tgz
-cd Python-3.10.0
-./configure --prefix=$SCRATCHDIR/python
-make
-make install
+# Check for Python
+if which python >/dev/null; then
+    echo "Python is installed"
+    python --version
+else
+    echo "Python is not installed"
+    wget https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tgz
+    tar -xzf Python-3.10.0.tgz
+    cd Python-3.10.0
+    ./configure --prefix=$SCRATCHDIR/python
+    make
+    make install
+fi
+
 export PATH=$SCRATCHDIR/python/bin:$PATH
+
 echo 'test'
- ls pip install clearml clearml-agent
+ls
+pip install clearml clearml-agent
 export PATH=$PATH:$HOMEDIR.local/bin
 export TMPDIR=$SCRATCHDIR
 clearml-agent --config-file '$HOMEDIR/clearml.conf' config
