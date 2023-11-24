@@ -39,11 +39,14 @@ else
 fi
 
 export PATH=$SCRATCHDIR/python/bin:$PATH
+export PATH=$SCRATCHDIR/.local/bin:$PATH
+export PATH=$HOMEDIR/jobs/python/bin:$PATH
 
 echo 'test'
 ls
 pip install clearml clearml-agent
 export PATH=$PATH:$HOMEDIR.local/bin
+export PATH=$SCRATCHDIR/.local/bin:$PATH
 export TMPDIR=$SCRATCHDIR
 clearml-agent --config-file '$HOMEDIR/clearml.conf' config
 clearml-agent --config-file '$HOMEDIR/clearml.conf' daemon --queue default --foreground
