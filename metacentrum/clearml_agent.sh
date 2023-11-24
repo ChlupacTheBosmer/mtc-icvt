@@ -1,7 +1,6 @@
 #!/bin/bash
 #PBS -N ClearML-Agent
-#PBS -l select=1:ncpus=1:mem=64gb:scratch_local=1gb
-#PBS -l walltime=1:00:00
+#PBS -l walltime=2:00:00
 #PBS -m ae
 # The 4 lines above are options for scheduling system: job will run 1 hour at maximum, 1 machine with 4 processors +
 # 4gb RAM memory + 10gb scratch memory are requested, email notification will be sent when the job aborts (a) or ends (e)
