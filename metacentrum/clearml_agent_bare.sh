@@ -41,23 +41,23 @@ fi
 export PATH=$PATH:$SCRATCHDIR/python/bin
 export PATH=$PATH:$SCRATCHDIR/.local/bin
 export PATH=$PATH:$SCRATCHDIR/.local/lib
-export PATH=$PATH:$HOMEDIR/jobs/python/bin
-export PATH=$PATH:$HOMEDIR/.local/bin
-export PATH=$PATH:$HOMEDIR/.local/lib
-source $HOMEDIR/.bashrc
+#export PATH=$PATH:$HOMEDIR/jobs/python/bin
+#export PATH=$PATH:$HOMEDIR/.local/bin
+#export PATH=$PATH:$HOMEDIR/.local/lib
+#source $HOMEDIR/.bashrc
 cd $SCRATCHDIR
 echo 'test'
-ls
+ls $SCRATCHDIR
 pip install clearml clearml-agent
 export PATH=$PATH:$SCRATCHDIR/python/bin
 export PATH=$PATH:$SCRATCHDIR/.local/bin
-export PATH=$PATH:$HOMEDIR/jobs/python/bin
-export PATH=$PATH:$HOMEDIR/.local/bin
-source $HOMEDIR/.bashrc
+#export PATH=$PATH:$HOMEDIR/jobs/python/bin
+#export PATH=$PATH:$HOMEDIR/.local/bin
+#source $HOMEDIR/.bashrc
 cd $SCRATCHDIR
 export TMPDIR=$SCRATCHDIR
-clearml-agent --config-file $HOMEDIR/clearml.conf config
-clearml-agent --config-file $HOMEDIR/clearml.conf daemon --queue default --foreground
+clearml-agent --config-file $SCRATCHDIR/clearml.conf config
+clearml-agent --config-file $SCRATCHDIR/clearml.conf daemon --queue default --foreground
 # Run calculations
 #singularity exec -B $HOMEDIR:/mnt \
 # $SING_IMAGE pip install clearml clearml-agent
